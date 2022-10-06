@@ -13,6 +13,8 @@
   <!-- [[IN SAMPLE]] -->
 
   <PropertyGroup>
+    <LangVersion>10.0</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <TargetPlatformVersion>10.0.18362.0</TargetPlatformVersion>
