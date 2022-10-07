@@ -12,6 +12,17 @@ namespace ABI { namespace Microsoft { namespace Graphics { namespace Canvas { na
     struct CoordinateMappingState;
     struct SourceInterpolationState;
 
+    class __declspec(uuid("5CBB1024-8EA1-4689-81BF-8AD190B5EF5D"))
+        ID2D1ResourceTextureManagerInternal : public IUnknown
+    {
+    public:
+        virtual HRESULT Initialize(
+            ID2D1EffectContext* effectContext,
+            const UINT32* dimensions) = 0;
+
+        virtual HRESULT GetResourceTexture(ID2D1ResourceTexture** resourceTexture) = 0;
+    };
+
     DEFINE_GUID(CLSID_PixelShaderEffect, 0x8db3047a, 0x84cc, 0x4152, 0xaf, 0x92, 0x50, 0xe4, 0xac, 0xb9, 0xd1, 0xfc);
 
 
@@ -24,6 +35,7 @@ namespace ABI { namespace Microsoft { namespace Graphics { namespace Canvas { na
         ComPtr<ClipTransform> m_clipTransform;
         ComPtr<ID2D1EffectContext> m_effectContext;
         ComPtr<ID2D1TransformGraph> m_transformGraph;
+        ComPtr<ID2D1ResourceTextureManagerInternal> m_ResourceTextureManager0;
 
         std::vector<BYTE> m_constants;
         bool m_constantsDirty;
@@ -59,6 +71,9 @@ namespace ABI { namespace Microsoft { namespace Graphics { namespace Canvas { na
 
         HRESULT SetSourceInterpolationProperty(BYTE const* data, UINT32 dataSize);
         HRESULT GetSourceInterpolationProperty(BYTE* data, UINT32 dataSize, UINT32 *actualSize) const;
+
+        HRESULT SetResourceTextureManager0Property(IUnknown* sharedState);
+        IUnknown* GetResourceTextureManager0Property() const;
     };
 
 

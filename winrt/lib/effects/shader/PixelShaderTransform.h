@@ -32,6 +32,7 @@ namespace ABI { namespace Microsoft { namespace Graphics { namespace Canvas { na
 
         void SetConstants(std::vector<BYTE> const& constants);
         void SetSourceInterpolation(SourceInterpolationState const* sourceInterpolation);
+        void SetD2D1ResourceTexture(UINT32 textureIndex, ID2D1ResourceTexture* resourceTexture);
     };
 
 }}}}}

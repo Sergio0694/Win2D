@@ -109,4 +109,9 @@ namespace ABI { namespace Microsoft { namespace Graphics { namespace Canvas { na
         }
     }
 
+    void PixelShaderTransform::SetD2D1ResourceTexture(UINT32 textureIndex, ID2D1ResourceTexture* resourceTexture)
+    {
+        ThrowIfFailed(m_drawInfo->SetResourceTexture(textureIndex, resourceTexture));
+    }
+
 }}}}}

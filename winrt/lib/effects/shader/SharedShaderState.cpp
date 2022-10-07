@@ -516,7 +516,8 @@ namespace ABI { namespace Microsoft { namespace Graphics { namespace Canvas { na
                     ThrowHR(E_INVALIDARG, Strings::CustomEffectTooManyTextures);
 
                 // Record how many input textures this shader uses.
-                m_shader.InputCount = std::max(m_shader.InputCount, inputDesc.BindPoint + 1);
+                // TODO: temporarily set to 0, need a way to distinguish inputs from resource textures.
+                //m_shader.InputCount = std::max(m_shader.InputCount, inputDesc.BindPoint + 1);
                 break;
 
             case D3D_SIT_CBUFFER:

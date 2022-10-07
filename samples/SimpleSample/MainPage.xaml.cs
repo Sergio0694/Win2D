@@ -3,6 +3,7 @@
 // Licensed under the MIT License. See LICENSE.txt in the project root for license information.
 
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using ComputeSharp;
@@ -79,6 +80,30 @@ namespace SimpleSample
                     dataSize: (uint)constantBuffer.Length).Assert();
             }
 
+            using ComPtr<IUnknown> resourceTextureManager = default;
+
+            // Create an ID2D1ResourceTextureManager instance
+            D2D1ResourceTextureManager.Create((void**)resourceTextureManager.GetAddressOf());
+
+            // Initialize it with some data (this will go into a staging buffer for now)
+            D2D1ResourceTextureManager.Initialize(
+                resourceTextureManager.Get(),
+                Guid.NewGuid(),
+                extents: stackalloc uint[] { 4096 },
+                bufferPrecision: D2D1BufferPrecision.Float32,
+                channelDepth: D2D1ChannelDepth.One,
+                filter: D2D1Filter.MinMagMipLinear,
+                extendModes: stackalloc D2D1ExtendMode[] { D2D1ExtendMode.Clamp },
+                data: MemoryMarshal.AsBytes(Enumerable.Range(0, 4096).Select(i => i / 4096.0f).ToArray().AsSpan()),
+                strides: ReadOnlySpan<uint>.Empty);
+
+            // Assign the resource texture manager to the effect
+            d2D1Effect.Get()->SetValue(
+                index: 4,
+                type: D2D1_PROPERTY_TYPE.Unknown,
+                data: (byte*)resourceTextureManager.GetAddressOf(),
+                dataSize: (uint)sizeof(void*)).Assert();
+
             session.DrawImage(pixelShaderEffect);
         }
     }
@@ -136,6 +161,7 @@ namespace SimpleSample
     /// A simple shader to get started with based on shadertoy new shader template.
     /// Ported from <see href="https://www.shadertoy.com/new"/>.
     /// </summary>
+    [D2DInputCount(0)]
     [D2DRequiresScenePosition]
     [D2DShaderProfile(D2D1ShaderProfile.PixelShader41)]
     [AutoConstructor]
@@ -148,18 +174,20 @@ namespace SimpleSample
         public readonly int width;
         public readonly int height;
 
+        [D2DResourceTextureIndex(0)]
+        public readonly D2D1ResourceTexture1D<float> buffer;
+
         /// <inheritdoc/>
         public float4 Execute()
         {
-            // Normalized screen space UV coordinates from 0.0 to 1.0
             int2 xy = (int2)D2D.GetScenePosition().XY;
-            float2 uv = (float2)xy / new float2(this.width, this.height);
 
-            // Time varying pixel color
-            float3 col = 0.5f + 0.5f * Hlsl.Cos(this.time + new float3(uv, uv.X) + new float3(0, 2, 4));
+            uint x = (uint)xy.X % 64;
+            uint y = (uint)xy.Y % 64;
 
-            // Output to screen
-            return new(col, 1f);
+            float value = buffer[(int)(x * 64 + y)];
+
+            return new(value, 0, 0, 1);
         }
     }
 }

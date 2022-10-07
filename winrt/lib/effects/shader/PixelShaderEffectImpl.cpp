@@ -55,6 +55,10 @@ namespace ABI { namespace Microsoft { namespace Graphics { namespace Canvas { na
                 <Property name='DisplayName' type='string' value='SourceInterpolation'/>
                 <Property name='Default' type='blob' value=''/>
             </Property>
+            <Property name='ResourceTextureManager0' type='iunknown'>
+                <Property name='DisplayName' type='string' value='ResourceTextureManager0'/>
+                <Property name='Default' type='iunknown' value='null'/>
+            </Property>
         </Effect>
     );
 
@@ -94,10 +98,11 @@ namespace ABI { namespace Microsoft { namespace Graphics { namespace Canvas { na
 
         static const D2D1_PROPERTY_BINDING bindings[] =
         {
-            D2D1_VALUE_TYPE_BINDING(L"SharedState",         &SetSharedStateProperty,         &GetSharedStateProperty),
-            D2D1_BLOB_TYPE_BINDING (L"Constants",           &SetConstantsProperty,           &GetConstantsProperty),
-            D2D1_BLOB_TYPE_BINDING (L"CoordinateMapping",   &SetCoordinateMappingProperty,   &GetCoordinateMappingProperty),
-            D2D1_BLOB_TYPE_BINDING (L"SourceInterpolation", &SetSourceInterpolationProperty, &GetSourceInterpolationProperty),
+            D2D1_VALUE_TYPE_BINDING(L"SharedState",             &SetSharedStateProperty,             &GetSharedStateProperty),
+            D2D1_BLOB_TYPE_BINDING (L"Constants",               &SetConstantsProperty,               &GetConstantsProperty),
+            D2D1_BLOB_TYPE_BINDING (L"CoordinateMapping",       &SetCoordinateMappingProperty,       &GetCoordinateMappingProperty),
+            D2D1_BLOB_TYPE_BINDING (L"SourceInterpolation",     &SetSourceInterpolationProperty,     &GetSourceInterpolationProperty),
+            D2D1_VALUE_TYPE_BINDING(L"ResourceTextureManager0", &SetResourceTextureManager0Property, &GetResourceTextureManager0Property),
         };
 
         ThrowIfFailed(factory->RegisterEffectFromString(CLSID_PixelShaderEffect, effectXml, bindings, _countof(bindings), PixelShaderEffectImplFactory));
@@ -154,6 +159,16 @@ namespace ABI { namespace Microsoft { namespace Graphics { namespace Canvas { na
             {
                 m_shaderTransform->SetSourceInterpolation(m_sourceInterpolation.get());
                 m_sourceInterpolationDirty = false;
+            }
+
+            // Set the resource texture
+            if (m_ResourceTextureManager0)
+            {
+                ComPtr<ID2D1ResourceTexture> resourceTexture;
+
+                ThrowIfFailed(m_ResourceTextureManager0->GetResourceTexture(resourceTexture.GetAddressOf()));
+
+                m_shaderTransform->SetD2D1ResourceTexture(0, resourceTexture.Get());
             }
         });
     }
@@ -340,6 +355,28 @@ namespace ABI { namespace Microsoft { namespace Graphics { namespace Canvas { na
         }
 
         return S_OK;
+    }
+
+    HRESULT PixelShaderEffectImpl::SetResourceTextureManager0Property(IUnknown* resourceTextureManager)
+    {
+        return ExceptionBoundary([&]
+            {
+                CheckInPointer(resourceTextureManager);
+
+                if (m_ResourceTextureManager0)
+                    m_ResourceTextureManager0.Reset();
+
+                m_ResourceTextureManager0 = As<ID2D1ResourceTextureManagerInternal>(resourceTextureManager);
+
+                if (m_effectContext && m_ResourceTextureManager0)
+                    ThrowIfFailed(m_ResourceTextureManager0->Initialize(m_effectContext.Get(), nullptr));
+            });
+    }
+
+
+    IUnknown* PixelShaderEffectImpl::GetResourceTextureManager0Property() const
+    {
+        return m_ResourceTextureManager0 ? As<IUnknown>(m_ResourceTextureManager0).Detach() : nullptr;
     }
 
 }}}}}
