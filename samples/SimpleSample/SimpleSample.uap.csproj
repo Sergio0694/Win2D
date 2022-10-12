@@ -105,6 +105,8 @@
     <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ABI.Microsoft.Graphics.Canvas\GetImageFlags.cs" />
+    <Compile Include="ABI.Microsoft.Graphics.Canvas\ICanvasImageInternal.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
