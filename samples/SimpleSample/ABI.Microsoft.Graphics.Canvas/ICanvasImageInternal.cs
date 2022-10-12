@@ -16,6 +16,7 @@ internal unsafe interface ICanvasImageInternal
     /// <summary>
     /// Gets an <see cref="ID2D1Image"/> from an <see cref="ICanvasImageInternal"/> instance.
     /// </summary>
+    /// <param name="retBuf">A pointer to the return buffer to write the result into (needed for ABI matching).</param>
     /// <param name="device">The input canvas device (as pointer to internal interface).</param>
     /// <param name="deviceContext">
     /// The device context in use. This value is is optional (but recommended), except when the
@@ -36,8 +37,10 @@ internal unsafe interface ICanvasImageInternal
     /// The DPI of a source bitmap, or zero if the image does not have a fixed DPI. A <c>D2D1DpiCompensation</c> effect
     /// will be inserted if <paramref name="targetDpi"/> and <paramref name="realizeDpi"/> are different (flags permitting).
     /// </param>
-    /// <returns>The resulting image.</returns>
-    ID2D1Image* GetD2DImage(
+    /// <returns>A pointer to the resulting image (this value is the same as <paramref name="retBuf"/>).</returns>
+    [PreserveSig]
+    ID2D1Image** GetD2DImage(
+        ID2D1Image** retBuf,
         IUnknown* device,
         ID2D1DeviceContext* deviceContext,
         GetImageFlags flags,
